@@ -1,0 +1,111 @@
+<main class="login-layout">
+  <section class="intro">
+    <div class="eyebrow"><span class="short-line"></span> A BETTER WAY IN</div>
+    <h1>
+      <span>Your account.</span><span>Your choice</span
+      ><span>of <em>sign-in.</em></span>
+    </h1>
+    <p class="intro-copy">
+      A small space to try passkeys. Start with a password, add your device, and
+      experience a simpler way back.
+    </p>
+    <div class="flow-preview" aria-hidden="true">
+      <span class="flow-node">01 <b>Sign in</b></span
+      ><i>→</i><span class="flow-node">02 <b>Add a passkey</b></span
+      ><i>→</i><span class="flow-node">03 <b>Try it out</b></span>
+    </div>
+    <div class="intro-note">
+      <span class="shield" aria-hidden="true">◇</span>
+      <p>
+        Your device keeps the private key.<br /><strong
+          >Your password still works.</strong
+        >
+      </p>
+    </div>
+  </section>
+  <section class="card login-card" aria-labelledby="login-title">
+    <div class="card-marker">01 / SIGN IN</div>
+    <h2 id="login-title">Welcome back</h2>
+    <p class="muted">Choose how you’d like to sign in.</p>
+    @if (error() || auth.startupError()) {
+      <div class="alert error" role="alert">
+        {{ error() || auth.startupError() }}
+      </div>
+    }
+    <form (ngSubmit)="passwordLogin()" novalidate>
+      <fieldset [disabled]="!!busy()">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          name="username"
+          [(ngModel)]="username"
+          autocomplete="username webauthn"
+          maxlength="100"
+          placeholder="Enter your username"
+          required
+          [attr.aria-invalid]="submitted && !username.trim()"
+          aria-describedby="username-error"
+        />
+        @if (submitted && !username.trim()) {
+          <small id="username-error" class="field-error"
+            >Enter your username.</small
+          >
+        }
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          type="password"
+          autocomplete="current-password"
+          maxlength="200"
+          placeholder="Enter your password"
+          required
+          [attr.aria-invalid]="submitted && !password"
+          aria-describedby="password-error"
+        />
+        @if (submitted && !password) {
+          <small id="password-error" class="field-error"
+            >Enter your password.</small
+          >
+        }
+        <button class="button primary full" type="submit">
+          {{ busy() === "password" ? "Signing in…" : "Sign in with password"
+          }}<span aria-hidden="true">→</span>
+        </button>
+      </fieldset>
+    </form>
+    @if (hasPasskeys()) {
+      <div class="divider"><span>or use your device</span></div>
+      <button
+        type="button"
+        class="button secondary full"
+        [disabled]="!!busy() || !passkeys.supported"
+        (click)="passkeyLogin()"
+      >
+        <span aria-hidden="true">⌘</span
+        >{{
+          busy() === "passkey"
+            ? "Waiting for your device…"
+            : "Sign in with a passkey"
+        }}
+      </button>
+      <p class="small centered">
+        @if (passkeys.supported) {
+          Use your fingerprint, face, PIN, or security key.
+        } @else {
+          Passkeys are unavailable. Use a supported browser over HTTPS, or sign
+          in with your password.
+        }
+      </p>
+    }
+    <div class="demo-credentials">
+      <div class="eyebrow">TRY A DEMO ACCOUNT</div>
+      <p><strong>alice</strong><code>AliceDemo!123</code></p>
+      <p><strong>bob</strong><code>BobDemo!123</code></p>
+    </div>
+    <p class="storage-note">
+      Demo data is stored in memory and resets when the API restarts.
+    </p>
+  </section>
+</main>

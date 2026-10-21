@@ -1,0 +1,170 @@
+<main class="profile-layout">
+  <aside class="profile-sidebar">
+    <div class="avatar">{{ auth.user()?.displayName?.charAt(0) }}</div>
+    <h2>{{ auth.user()?.displayName }}</h2>
+    <p class="muted">&#64;{{ auth.user()?.username }}</p>
+    <div class="sidebar-rule"></div>
+    <div class="eyebrow">YOUR ACCOUNT</div>
+    <a href="/profile" class="sidebar-active" aria-current="page"
+      ><span aria-hidden="true">⚙</span> Profile settings</a
+    >
+    <div class="session-note">
+      <span class="status-dot"></span>Signed in with
+      {{ auth.user()?.loginMethod?.toLowerCase() }}
+    </div>
+    <button
+      class="button text-button"
+      type="button"
+      [disabled]="!!busy()"
+      (click)="logout()"
+    >
+      {{ busy() === "logout" ? "Signing out…" : "Sign out" }}
+      <span aria-hidden="true">↗</span>
+    </button>
+  </aside>
+  <section class="profile-content">
+    <div class="eyebrow">YOUR ACCOUNT / SETTINGS</div>
+    <h1>User Profile Settings</h1>
+    <p class="page-description">Make your next sign-in a little simpler.</p>
+    @if (error()) {
+      <div class="alert error" role="alert">{{ error() }}</div>
+    }
+    @if (success()) {
+      <div class="alert success" role="status">{{ success() }}</div>
+    }
+    <section
+      class="card passkey-card"
+      aria-labelledby="passkeys-title"
+      [attr.aria-busy]="!!busy()"
+    >
+      <div class="section-heading">
+        <div class="key-symbol" aria-hidden="true">⌘</div>
+        <div>
+          <h2 id="passkeys-title">Passkeys</h2>
+          <p class="muted">Your device. Your shortcut to signing in.</p>
+        </div>
+        <span class="count-badge">{{ keys().length }} added</span>
+      </div>
+      <p class="section-copy">
+        Use a fingerprint, face, device PIN, or security key instead of typing a
+        password. Add a passkey on this device or use another authenticator.
+      </p>
+      <div class="password-preserved">
+        <span aria-hidden="true">✓</span
+        ><span>Your username and password will continue to work.</span>
+      </div>
+      <form (ngSubmit)="register()" novalidate class="register-form">
+        <fieldset [disabled]="!!busy() || !passkeys.supported">
+          <label for="passkey-name">Give your passkey a name</label>
+          <div class="input-action">
+            <input
+              id="passkey-name"
+              name="passkeyName"
+              [(ngModel)]="name"
+              maxlength="60"
+              required
+              placeholder="e.g. Personal laptop"
+              [attr.aria-invalid]="submitted && !name.trim()"
+              aria-describedby="name-help"
+            /><button class="button primary" type="submit">
+              {{
+                busy() === "register"
+                  ? "Waiting for device…"
+                  : "+ Add a passkey"
+              }}
+            </button>
+          </div>
+          <small
+            id="name-help"
+            [class.field-error]="submitted && !name.trim()"
+            >{{
+              submitted && !name.trim()
+                ? "Enter a friendly name for this passkey."
+                : "A name to help you recognize this device. Up to 60 characters."
+            }}</small
+          >
+        </fieldset>
+      </form>
+      @if (!passkeys.supported) {
+        <div class="alert error" role="status">
+          Passkeys are unavailable here. Open this app in a supported browser
+          over HTTPS. Password login is still available.
+        </div>
+      }
+      <div class="list-title">
+        <h3>Registered passkeys</h3>
+        <span>UP TO 10 PER ACCOUNT</span>
+      </div>
+      @if (busy() === "loading") {
+        <p role="status" class="empty-state">Loading your passkeys…</p>
+      } @else if (!keys().length) {
+        <div class="empty-state">
+          <span class="empty-icon" aria-hidden="true">⌘</span
+          ><strong>No passkeys yet</strong>
+          <p>Add your first passkey above, then try it on your next sign-in.</p>
+        </div>
+      }
+      @for (key of keys(); track key.id) {
+        <div class="passkey-row">
+          <span class="device-icon" aria-hidden="true">▣</span>
+          <div class="key-details">
+            <strong>{{ key.name }}</strong>
+            <p>
+              Added {{ key.createdAt | date: "mediumDate" }} ·
+              {{
+                key.lastUsedAt
+                  ? "Last used " + (key.lastUsedAt | date: "short")
+                  : "Not used yet"
+              }}
+            </p>
+          </div>
+          @if (removing() === key.id) {
+            <div class="remove-confirm">
+              <span>Remove this passkey?</span
+              ><button
+                type="button"
+                class="button danger"
+                [disabled]="!!busy()"
+                (click)="remove(key)"
+              >
+                Confirm remove</button
+              ><button
+                type="button"
+                class="button text-button"
+                [disabled]="!!busy()"
+                (click)="removing.set(null)"
+              >
+                Cancel
+              </button>
+            </div>
+          } @else {
+            <button
+              class="button text-button remove-button"
+              type="button"
+              [disabled]="!!busy()"
+              [attr.aria-label]="'Remove ' + key.name"
+              (click)="removing.set(key.id)"
+            >
+              Remove
+            </button>
+          }
+        </div>
+      }
+      <p class="storage-note">
+        Removing a passkey here does not delete it from your device’s password
+        manager.
+      </p>
+    </section>
+    <div class="memory-note">
+      <span aria-hidden="true">ⓘ</span>
+      <div>
+        <strong>A fresh start on every API restart</strong>
+        <p>
+          Users, registered passkeys, challenges, and sessions live in memory.
+          After a restart, sign in with a demo password and register a new
+          passkey.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>

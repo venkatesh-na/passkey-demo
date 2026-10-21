@@ -1,0 +1,12 @@
+# Render builds both apps into one Docker service with managed public HTTPS.
+services:
+  - type: web
+    name: passkey-studio
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production

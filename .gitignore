@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.angular/
+.npm-cache/
+.nuget/
+.dotnet/
+.artifacts/
+certs/
+test-results/
+playwright-report/
+*.log
+*.user
+.vs/
